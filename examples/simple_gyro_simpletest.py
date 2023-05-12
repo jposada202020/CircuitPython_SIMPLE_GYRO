@@ -6,9 +6,15 @@ import time
 import board
 import simple_gyro
 
-i2c = board.I2C()  # uses board.SCL and board.SDA
-xxx = simple_gyro.SIMPLE_GYRO(i2c)
+display = board.DISPLAY
 
-while True:
-    # print("Pressure: {:.2f}hPa".format(lps.pressure))
-    time.sleep(0.5)
+gyro = simple_gyro.Gyro()
+
+for i in range(0, -10, -1):
+    gyro.update_tilt(i)
+    time.sleep(0.1)
+
+for i in range(0, -15, -1):
+    gyro.update_roll(i)
+    gyro.update_pitch(i * -1)
+    time.sleep(0.1)
