@@ -12,33 +12,27 @@ Displayio Gyro representation
 
 
 """
-
+# pylint: disable=too-many-arguments, unused-variable
 import math
-import random
 import time
-import bitmaptools
 import board
 import displayio
-from bitmaptools import draw_line, rotozoom, draw_circle, draw_polygon
+from bitmaptools import draw_circle
 import vectorio
-
-try:
-    from busio import I2C
-    from typing import Tuple
-except ImportError:
-    pass
 
 
 __version__ = "0.0.0+auto.0"
 __repo__ = "https://github.com/jposada202020/CircuitPython_SIMPLE_GYRO.git"
 
 
-
-
-
 display = board.DISPLAY
 
+
 class Gyro:
+    """
+    Gyro Graphical Representation
+    """
+
     def __init__(self, posx=100, posy=100, radius=50, padding=10, line_roll_heigth=10):
         self.radius = radius
         self.padding = padding
@@ -93,13 +87,15 @@ class Gyro:
         self.indicator_original_values = self.indicator.points
         self.indix, self.indiy = self.indicator.location
 
-
-        for i in range(-180,180):
+        for i in range(-180, 180):
             self.update_roll(i)
             self.update_pitch(i)
             time.sleep(0.01)
 
     def update_roll(self, angle):
+        """
+        Update pitch/roll
+        """
 
         angle = angle * 0.017
 
@@ -120,6 +116,9 @@ class Gyro:
         self.indicator.points = dummy
 
     def update_pitch(self, angle):
+        """
+        Update pitch/roll
+        """
 
         angle = angle * 0.017
 
@@ -175,5 +174,6 @@ class Gyro:
                 ),
             ),
         ]
+
 
 Gyro()
