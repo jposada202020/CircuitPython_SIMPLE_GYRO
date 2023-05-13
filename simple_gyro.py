@@ -13,6 +13,7 @@ Displayio Gyro representation
 
 """
 # pylint: disable=too-many-arguments, unused-variable, too-many-locals, too-many-statements
+# pylint: disable=too-many-instance-attributes
 from math import pi, cos, sin
 import board
 import displayio
@@ -34,102 +35,59 @@ class Gyro:
     Gyro Graphical Representation
     """
 
-    def __init__(self, posx=100, posy=100, radius=50, padding=10, line_roll_heigth=10):
+    def __init__(
+        self,
+        posx=100,
+        posy=100,
+        radius=50,
+        padding=10,
+        line_roll_height=10,
+        color_circle=0x440044,
+        color_needle=0x123456,
+        color_indicator=0x112299,
+        color_tick_indicator=0xFF0000,
+    ):
+        self.posx = posx
+        self.posy = posy
         self.radius = radius
         self.padding = padding
-
-        palette = displayio.Palette(6)
-        palette.make_transparent(0)
-        palette[1] = 0x440044
-        palette[2] = 0xFF00FF
-        palette[3] = 0x0000FF
-        palette[4] = 0xFFFF00
-        palette[5] = 0xFF0000
-
-        self.needle_palette = displayio.Palette(5)
-        self.needle_palette[0] = 0x123456
-        self.needle_palette[1] = 0xFF0000
-        self.needle_palette[2] = 0x00FF00
-        self.needle_palette[3] = 0x0000FF
+        self._line_roll_height = line_roll_height
+        self._line_roll_length = (2 * self.radius - 2 * self.padding) // 2
 
         group = displayio.Group()
-        line_roll_lenght = (2 * radius - 2 * padding) // 2
 
-        points_level = [
-            (0, 0),
-            (line_roll_lenght - 10, 0),
-            (line_roll_lenght - 10, line_roll_heigth // 3),
-            (-line_roll_lenght + 10, line_roll_heigth // 3),
-            (-line_roll_lenght + 10, 0),
-        ]
-        self.level = Polygon(
-            points=points_level,
-            pixel_shader=self.needle_palette,
-            x=posx,
-            y=posy - line_roll_heigth // 2,
-            color_index=1,
+        self._palette = displayio.Palette(6)
+        self._palette.make_transparent(0)
+        self._palette[1] = color_circle
+        self._palette[2] = color_needle
+        self._palette[3] = color_indicator
+        self._palette[4] = color_tick_indicator
+        self._palette[5] = 0xFFFF00
+
+        self.dial_bitmap = displayio.Bitmap(2 * radius + 1, 2 * radius + 1, 10)
+        background = displayio.TileGrid(
+            self.dial_bitmap,
+            pixel_shader=self._palette,
+            x=posx - radius,
+            y=posy - self.radius,
         )
-        self.level_origin_y = self.level.y
 
-        points_polygono = [
-            (0, 0),
-            (line_roll_lenght, 0),
-            (line_roll_lenght, line_roll_heigth),
-            (-line_roll_lenght, line_roll_heigth),
-            (-line_roll_lenght, 0),
-        ]
+        self._draw_level()
+        self._draw_inclination_line()
+        self._draw_indicator()
 
-        self.needle = Polygon(
-            points=points_polygono,
-            pixel_shader=self.needle_palette,
-            x=posx,
-            y=posy,
-        )
-        self.original_values = self.needle.points
-
-        points_indicator = [(0, 0), (20, 0), (20, -6), (0, -6)]
-        self.indicator = Polygon(
-            points=points_indicator,
-            pixel_shader=self.needle_palette,
-            x=posx - 5,
-            y=posy - 30,
-        )
         group.append(self.level)
         group.append(self.needle)
         group.append(self.indicator)
-        dial_bitmap = displayio.Bitmap(2 * radius + 1, 2 * radius + 1, 10)
-        background = displayio.TileGrid(
-            dial_bitmap, pixel_shader=palette, x=posx - radius, y=posy - radius
-        )
+
         group.append(background)
-
-        tick_stroke = 1
-        tick_length = 6
-
-        tick_bitmap = displayio.Bitmap(tick_stroke, tick_length, 5)
-        tick_bitmap.fill(3)
-        pos = [-90, -85, -80, -75, -70, -65, -60, -95, -100, -105, -110, -115, -120]
-        for i in pos:
-            this_angle = i * DEG_TO_RAD
-
-            target_position_x = radius + radius * cos(this_angle)
-            target_position_y = radius + radius * sin(this_angle)
-
-            rotozoom(
-                dial_bitmap,
-                ox=round(target_position_x),
-                oy=round(target_position_y),
-                source_bitmap=tick_bitmap,
-                px=round(tick_bitmap.width / 2),
-                py=0,
-                angle=0,  # in radians
-            )
+        self._draw_tick_indicator()
 
         tick2_stroke = 2
         tick2_length = 12
 
         tick2_bitmap = displayio.Bitmap(tick2_length, tick2_stroke, 5)
-        tick2_bitmap.fill(4)
+        tick2_bitmap.fill(5)
         pos = [0, 15, 30, -15, -30]
         for i in pos:
             this_angle = i * DEG_TO_RAD
@@ -138,7 +96,7 @@ class Gyro:
             target_position_y = (radius * sin(this_angle)) + radius
 
             rotozoom(
-                dial_bitmap,
+                self.dial_bitmap,
                 ox=round(target_position_x),
                 oy=round(target_position_y),
                 source_bitmap=tick2_bitmap,
@@ -155,7 +113,7 @@ class Gyro:
             target_position_y = (radius * sin(this_angle)) + radius
 
             rotozoom(
-                dial_bitmap,
+                self.dial_bitmap,
                 ox=round(target_position_x),
                 oy=round(target_position_y),
                 source_bitmap=tick2_bitmap,
@@ -164,16 +122,84 @@ class Gyro:
                 angle=0,  # in radians
             )
 
-        draw_circle(dial_bitmap, radius, radius, radius, 2)
+        draw_circle(self.dial_bitmap, radius, radius, radius, 1)
 
         display.show(group)
 
         self.indicator_original_values = self.indicator.points
         self.indix, self.indiy = self.indicator.location
 
+    def _draw_inclination_line(self):
+        points_polygono = [
+            (0, 0),
+            (self._line_roll_length, 0),
+            (self._line_roll_length, self._line_roll_height),
+            (-self._line_roll_length, self._line_roll_height),
+            (-self._line_roll_length, 0),
+        ]
+
+        self.needle = Polygon(
+            points=points_polygono,
+            pixel_shader=self._palette,
+            x=self.posx,
+            y=self.posy,
+            color_index=2,
+        )
+        self.original_values = self.needle.points
+
+    def _draw_indicator(self):
+        points_indicator = [(0, 0), (20, 0), (20, -6), (0, -6)]
+        self.indicator = Polygon(
+            pixel_shader=self._palette,
+            points=points_indicator,
+            x=self.posx - 5,
+            y=self.posy - 30,
+            color_index=3,
+        )
+
+    def _draw_tick_indicator(self):
+        tick_stroke = 1
+        tick_length = 6
+
+        tick_bitmap = displayio.Bitmap(tick_stroke, tick_length, 5)
+        tick_bitmap.fill(4)
+        pos = [-90, -85, -80, -75, -70, -65, -60, -95, -100, -105, -110, -115, -120]
+        for i in pos:
+            this_angle = i * DEG_TO_RAD
+
+            target_position_x = self.radius + self.radius * cos(this_angle)
+            target_position_y = self.radius + self.radius * sin(this_angle)
+
+            rotozoom(
+                self.dial_bitmap,
+                ox=round(target_position_x),
+                oy=round(target_position_y),
+                source_bitmap=tick_bitmap,
+                px=round(tick_bitmap.width / 2),
+                py=0,
+                angle=0,  # in radians
+            )
+
+    def _draw_level(self, padding_level=10):
+        points_level = [
+            (0, 0),
+            (self._line_roll_length - padding_level, 0),
+            (self._line_roll_length - padding_level, self._line_roll_height // 3),
+            (-self._line_roll_length + padding_level, self._line_roll_height // 3),
+            (-self._line_roll_length + padding_level, 0),
+        ]
+        self.level = Polygon(
+            pixel_shader=self._palette,
+            points=points_level,
+            x=self.posx,
+            y=self.posy - self._line_roll_height // 2,
+            color_index=1,
+        )
+        self.level_origin_y = self.level.y
+
     def update_roll(self, angle):
         """
-        update roll/pitc
+        update roll/pitch
         """
         starting_angle = -90 * DEG_TO_RAD
 
