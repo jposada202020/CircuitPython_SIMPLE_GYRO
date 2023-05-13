@@ -73,56 +73,14 @@ class Gyro:
         self._draw_inclination_line()
         self._draw_indicator()
 
+        self.group.append(background)
         self.group.append(self.level)
         self.group.append(self.needle)
         self.group.append(self.indicator)
 
-        self.group.append(background)
-        self._draw_tick_indicator()
-
-        tick2_stroke = 2
-        tick2_length = 12
-
-        tick2_bitmap = displayio.Bitmap(tick2_length, tick2_stroke, 5)
-        tick2_bitmap.fill(5)
-        pos = [0, 15, 30, -15, -30]
-        for i in pos:
-            this_angle = i * DEG_TO_RAD
-
-            target_position_x = (radius * cos(this_angle)) + radius - tick2_length
-            target_position_y = (radius * sin(this_angle)) + radius
-
-            rotozoom(
-                self.dial_bitmap,
-                ox=round(target_position_x),
-                oy=round(target_position_y),
-                source_bitmap=tick2_bitmap,
-                px=0,
-                py=0,
-                angle=0,  # in radians
-            )
-
-        pos = [150, 165, 180, 195, 210]
-        for i in pos:
-            this_angle = i * DEG_TO_RAD
-
-            target_position_x = (radius * cos(this_angle)) + radius
-            target_position_y = (radius * sin(this_angle)) + radius
-
-            rotozoom(
-                self.dial_bitmap,
-                ox=round(target_position_x),
-                oy=round(target_position_y),
-                source_bitmap=tick2_bitmap,
-                px=0,
-                py=0,
-                angle=0,  # in radians
-            )
-
         draw_circle(self.dial_bitmap, radius, radius, radius, 1)
-
-        self.indicator_original_values = self.indicator.points
-        self.indix, self.indiy = self.indicator.location
+        self._draw_tick_indicator()
+        self._draw_ticks_level()
 
     def _draw_inclination_line(self):
         points_polygono = [
@@ -151,14 +109,18 @@ class Gyro:
             y=self.posy - 30,
             color_index=3,
         )
+        self.indicator_original_values = self.indicator.points
+        self.indix, self.indiy = self.indicator.location
+        self.update_roll(0)
 
     def _draw_tick_indicator(self):
         tick_stroke = 1
-        tick_length = 6
+        tick_length = 30
 
         tick_bitmap = displayio.Bitmap(tick_stroke, tick_length, 5)
         tick_bitmap.fill(4)
-        pos = [-90, -85, -80, -75, -70, -65, -60, -95, -100, -105, -110, -115, -120]
+
+        pos = [-90, -80, -70, -60, -100, -110, -120]
         for i in pos:
             this_angle = i * DEG_TO_RAD
 
@@ -172,7 +134,7 @@ class Gyro:
                 source_bitmap=tick_bitmap,
                 px=round(tick_bitmap.width / 2),
                 py=0,
-                angle=0,  # in radians
+                angle=this_angle + 90 * DEG_TO_RAD,  # in radians
             )
 
     def _draw_level(self, padding_level=10):
@@ -191,6 +153,48 @@ class Gyro:
             color_index=1,
         )
         self.level_origin_y = self.level.y
+
+    def _draw_ticks_level(self):
+        tick2_stroke = 2
+        tick2_length = 30
+
+        tick2_bitmap = displayio.Bitmap(tick2_length, tick2_stroke, 5)
+        tick2_bitmap.fill(5)
+        pos = [0, 15, 30, -15, -30]
+        for i in pos:
+            this_angle = i * DEG_TO_RAD
+
+            target_position_x = (
+                (self.radius * cos(this_angle)) + self.radius - tick2_length
+            )
+            target_position_y = (self.radius * sin(this_angle)) + self.radius
+
+            rotozoom(
+                self.dial_bitmap,
+                ox=round(target_position_x),
+                oy=round(target_position_y),
+                source_bitmap=tick2_bitmap,
+                px=0,
+                py=0,
+                angle=0,  # in radians
+            )
+
+        pos = [150, 165, 180, 195, 210]
+        for i in pos:
+            this_angle = i * DEG_TO_RAD
+
+            target_position_x = (self.radius * cos(this_angle)) + self.radius
+            target_position_y = (self.radius * sin(this_angle)) + self.radius
+
+            rotozoom(
+                self.dial_bitmap,
+                ox=round(target_position_x),
+                oy=round(target_position_y),
+                source_bitmap=tick2_bitmap,
+                px=0,
+                py=0,
+                angle=0,  # in radians
+            )
 
     def update_roll(self, angle):
         """
