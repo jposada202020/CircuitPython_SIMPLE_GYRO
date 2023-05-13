@@ -15,7 +15,6 @@ Displayio Gyro representation
 # pylint: disable=too-many-arguments, unused-variable, too-many-locals, too-many-statements
 # pylint: disable=too-many-instance-attributes
 from math import pi, cos, sin
-import board
 import displayio
 from bitmaptools import draw_circle, rotozoom
 from vectorio import Polygon
@@ -26,8 +25,6 @@ __repo__ = "https://github.com/jposada202020/CircuitPython_SIMPLE_GYRO.git"
 
 
 DEG_TO_RAD = pi / 180
-
-display = board.DISPLAY
 
 
 class Gyro:
@@ -54,7 +51,7 @@ class Gyro:
         self._line_roll_height = line_roll_height
         self._line_roll_length = (2 * self.radius - 2 * self.padding) // 2
 
-        group = displayio.Group()
+        self.group = displayio.Group()
 
         self._palette = displayio.Palette(6)
         self._palette.make_transparent(0)
@@ -76,11 +73,11 @@ class Gyro:
         self._draw_inclination_line()
         self._draw_indicator()
 
-        group.append(self.level)
-        group.append(self.needle)
-        group.append(self.indicator)
+        self.group.append(self.level)
+        self.group.append(self.needle)
+        self.group.append(self.indicator)
 
-        group.append(background)
+        self.group.append(background)
         self._draw_tick_indicator()
 
         tick2_stroke = 2
@@ -123,8 +120,6 @@ class Gyro:
             )
 
         draw_circle(self.dial_bitmap, radius, radius, radius, 1)
-
-        display.show(group)
 
         self.indicator_original_values = self.indicator.points
         self.indix, self.indiy = self.indicator.location

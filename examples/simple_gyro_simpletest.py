@@ -9,6 +9,7 @@ import simple_gyro
 display = board.DISPLAY
 
 gyro = simple_gyro.Gyro()
+display.show(gyro.group)
 
 for i in range(0, -10, -1):
     gyro.update_tilt(i)
