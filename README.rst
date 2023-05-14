@@ -16,7 +16,7 @@ Introduction
     :target: https://pepy.tech/project/circuitpython-simple-gyro
 
 .. image:: https://github.com/jposada202020/CircuitPython_SIMPLE-GYRO/workflows/Build%20CI/badge.svg
-    :target: https://github.com/jposada202020/CircuitPython_SIMPLE-GYRO/actions
+    :target: https://github.com/jposada202020/CircuitPython_SIMPLE_GYRO/actions
     :alt: Build Status
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
@@ -26,7 +26,7 @@ Introduction
 Displayio Gyro representation
 
 
-.. image:: https://github.com/jposada202020/CircuitPython_Arrowline/blob/main/docs/gyro.png
+.. image:: https://github.com/jposada202020/CircuitPython_SIMPLE_GYRO/blob/main/docs/gyro.png
 
 Dependencies
 =============
