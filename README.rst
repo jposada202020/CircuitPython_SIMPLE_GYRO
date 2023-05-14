@@ -26,6 +26,8 @@ Introduction
 Displayio Gyro representation
 
 
+.. image:: https://github.com/jposada202020/CircuitPython_Arrowline/blob/main/docs/gyro.png
+
 Dependencies
 =============
 This driver depends on:
