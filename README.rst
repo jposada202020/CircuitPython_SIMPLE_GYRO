@@ -26,7 +26,7 @@ Introduction
 Displayio Gyro representation
 
 
-.. image:: https://github.com/jposada202020/CircuitPython_SIMPLE_GYRO/blob/main/docs/gyro.png
+.. image:: https://github.com/jposada202020/CircuitPython_SIMPLE_GYRO/blob/master/docs/gyro.png
 
 Dependencies
 =============
