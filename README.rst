@@ -15,7 +15,7 @@ Introduction
     :alt: Total PyPI downloads
     :target: https://pepy.tech/project/circuitpython-simple-gyro
 
-.. image:: https://github.com/jposada202020/CircuitPython_SIMPLE-GYRO/workflows/Build%20CI/badge.svg
+.. image:: https://github.com/jposada202020/CircuitPython_SIMPLE_GYRO/workflows/Build%20CI/badge.svg
     :target: https://github.com/jposada202020/CircuitPython_SIMPLE_GYRO/actions
     :alt: Build Status
 
